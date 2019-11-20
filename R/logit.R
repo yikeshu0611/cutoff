@@ -1,0 +1,95 @@
+#' @title Cutoff Value for Logistic Regression
+#'
+#' @param data data
+#' @param y name for y, must code as 1 and 0. The outcome must be 1
+#' @param x name for x
+#' @param cut.numb number of cutoff points
+#' @param n.per the least percentage of the smaller group comprised in all patients
+#' @param y.per the least percentage of the outcome patients comprised in smaller group
+#' @param p.cut cutoff of p value, default is 0.05
+#' @param strict logical. TRUE means significant differences for each group
+#'     combination were considered. FALSE means considering for any group
+#' @param include direction of cutoff point. Any left letters of lower or upper
+#' @param round digital. Default is 2
+#' @importFrom stats binomial coef glm lm
+#'
+#' @return a dataframe contains cutoff points value, subject numbers in each group,
+#'     dump variable, or of regression and p value.
+#' @export
+#'
+#' @examples
+#' logit(data=mtcars,
+#'       y='am',
+#'       x='disp',
+#'       cut.numb=1,
+#'       n.per=0.25,
+#'       y.per=0.25)
+#'  logit(data=mtcars,
+#'        y='am',
+#'        x='disp',
+#'        cut.numb=1,
+#'        n.per=0.25,
+#'        y.per=0.20,
+#'        p.cut=0.05,
+#'        strict=TRUE,
+#'        include='low',
+#'        round=2)
+logit <- function(data,y,x,
+                   cut.numb,
+                   n.per,
+                   y.per,
+                   p.cut=0.05,
+                   strict=TRUE,
+                   include='low',
+                   round=2){
+    data=delet_na_df(data)
+    if (length(unique(data[,y])) != 2) stop('y must be 2 levels')
+    if (!any(min(unique(data[,y]))==0,max(unique(data[,y]))==1)) stop('y must code 0 or 1')
+    res.cut.1=get_cutoff(regress = 'logit',
+                         data,x,cut.numb,n.per,include,round,
+                         y,y.per)
+    for (i in 1:nrow(res.cut.1)) {
+        if (i==1){
+            res.cut=res.cut.1
+            pair.filt=NULL
+        }
+        res.cut.i=res.cut[i,1:cut.numb]
+        bt=cutit(data[,x],res.cut.i,include)
+        #all pairs
+        for (j in 1:cut.numb){
+            if (j==1) df=NULL
+            b=fastStat::to.refer(bt,j)
+            j.coef=coef(summary(glm(data[,y]~b, family = binomial(link = "logit"))))[-1,]
+            if (!is.matrix(j.coef)){
+                j.coef=data.frame(t(j.coef),check.names = F)
+                rownames(j.coef)='b2'
+            }
+            name.j=paste0(rownames(j.coef),collapse = '/')
+            beta.j=paste0(fastStat::digital(exp(j.coef[,1]),round),collapse = '/')
+            p.j=paste0(fastStat::digital(j.coef[,4],round),collapse = '/')
+            sum.j=sum(j.coef[,4] <= p.cut)
+            df=rbind(df,data.frame(dump=name.j,or=beta.j,
+                                   pvalue=p.j,sum=sum.j))
+        }
+        #judge
+        if (strict){
+            if (max(df[,4])==cut.numb){
+                pair.filt=rbind(pair.filt,df[df[,4]==cut.numb,][1,])
+            }else{
+                res.cut[i,]=NA
+            }
+        }else{
+            if (any(df[,4] >0 )){
+                pair.filt=rbind(pair.filt,df[df[,4]==max(df[,4]),][1,])
+            }else{
+                res.cut[i,]=NA
+            }
+        }
+    }
+    res=na.omit(res.cut)
+    if (nrow(res)==0) stop('No results. Please lower n.per, y.per or cut.numb')
+    r=cbind(na.omit(res.cut),pair.filt[,-4])
+    rownames(r)=NULL
+    message('\n4: last combination: ',nrow(r),'\n')
+    return(r)
+}
