@@ -1,20 +1,20 @@
-#' @title Cutoff Value for Logrank Analysis
+#' @title Significant Cutoff Value for Logrank Analysis
 #'
 #' @param data data
 #' @param time name for time variable
-#' @param y name for y, must code as 1 and 0. The outcome must be 1
+#' @param y name for y, must be coded as 1 and 0. The outcome must be 1
 #' @param x name for x
 #' @param cut.numb number of cutoff points
 #' @param n.per the least percentage of the smaller group comprised in all patients
-#' @param y.per the least percentage of the outcome patients comprised in smaller group
+#' @param y.per the least percentage of the smaller outcome patients comprised in each group
 #' @param p.cut cutoff of p value, default is 0.05
 #' @param strict logical. TRUE means significant differences for each group
-#'     combination were considered. FALSE means considering for any group
-#' @param include direction of cutoff point. Any left letters of lower or upper
+#'     combination were considered. FALSE means considering for any combination
+#' @param include direction of cutoff point. Any left letter of lower or upper
 #' @param round digital. Default is 2
 #'
 #' @return a dataframe contains cutoff points value, subject numbers in each group,
-#'     dump variable, beta of regression and p value.
+#'     dumb variable, beta of regression and p value.
 #' @export
 #'
 #' @examples
@@ -42,8 +42,14 @@ logrank <- function(data,time,y,x,
                 include='low',
                 round=2){
     data=delet_na_df(data)
-    if (length(unique(data[,y])) != 2) stop('y must be 2 levels')
-    if (!any(min(unique(data[,y]))==0,max(unique(data[,y]))==1)) stop('y must code 0 or 1')
+    if (length(unique(data[,y])) != 2){
+        message('y must be 2 levels')
+        return(NULL)
+    }
+    if (!any(min(unique(data[,y]))==0,max(unique(data[,y]))==1)){
+        message('y must code 0 or 1')
+        return(NULL)
+    }
     res.cut=get_cutoff(regress = 'logit',
                          data,x,cut.numb,n.per,include,round,
                          y,y.per)
@@ -51,12 +57,15 @@ logrank <- function(data,time,y,x,
         if (i==1) pvalue=NULL
         res.cut.i=res.cut[i,1:cut.numb]
         bt=cutit(data[,x],res.cut.i,include)
-        p.i=fastStat::survdiff_p.value(survival::survdiff(survival::Surv(data[,time],data[,y])~bt))
+        p.i=survdiff_p.value(survival::survdiff(survival::Surv(data[,time],data[,y])~bt))
         pvalue=c(pvalue,p.i)
     }
-    res.cut=cbind(res.cut,pvalue=fastStat::digital(pvalue,round))
+    res.cut=cbind(res.cut,pvalue=digital(pvalue,round))
     res=res.cut[pvalue<=p.cut,]
-    if (nrow(res)==0) stop('No results. Please lower n.per, y.per or cut.numb')
+    if (nrow(res)==0){
+        message('No results. Please lower n.per, y.per or cut.numb')
+        return(NULL)
+    }
     rownames(res)=NULL
     message('\n4: last combination: ',nrow(res),'\n')
     return(res)

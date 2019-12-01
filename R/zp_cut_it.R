@@ -1,3 +1,16 @@
+#' Cut Continuous Vector to Classification
+#'
+#' @param x numeric vector
+#' @param cut_points cuting points value
+#' @param include The direction of cutoff point. Any left letter of lower or upper
+#' @param labels logical. False is defaulted. TRUE means set range as factor.
+#'
+#' @return numeric vector or factor
+#' @export
+#'
+#' @examples
+#' cutit(mtcars$disp,c(150,190))
+#' cutit(mtcars$disp,c(150,190),labels = TRUE)
 cutit <- function(x,cut_points,include='low',labels=FALSE){
     if (!judge_123(cut_points)) stop('cut_points should be from small to big')
     seg = length(cut_points)+1
@@ -28,8 +41,7 @@ cutit <- function(x,cut_points,include='low',labels=FALSE){
     }
     if (labels){
         res2=factor(res,levels = 1:seg,labels = lab)
-        res3=data.frame(cbind(x=x,levels=res,labels=as.character(res2)))
-        return(res3)
+        return(res2)
     }else{
         return(res)
     }

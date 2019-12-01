@@ -1,5 +1,8 @@
 get_cutoff <- function(regress,data,x,cut.numb,n.per,include,round,y,y.per){
-    if ((cut.numb+1) * n.per > 1) stop('n.per or cut.cumb is so big')
+    if ((cut.numb+1) * n.per > 1){
+        message('n.per or cut.cumb is so big')
+        return(NULL)
+    }
     data=delet_na_df(data)
     data=data[order(data[,x]),]
     x=data[,x]
@@ -28,7 +31,7 @@ get_cutoff <- function(regress,data,x,cut.numb,n.per,include,round,y,y.per){
                 combn[i,]=NA
             }else{
                 tab=c(tab,paste0(tab.pn,collapse = '/'))
-                prop.pn=fastStat::digital(prop.pn,round)
+                prop.pn=digital(prop.pn,round)
                 prop=c(prop,paste0(prop.pn,collapse = '/'))
             }
         }
@@ -38,7 +41,10 @@ get_cutoff <- function(regress,data,x,cut.numb,n.per,include,round,y,y.per){
             }
     }
     comb.pn=data.frame(na.omit(combn))
-    if (nrow(comb.pn)==0) stop('n.per or cut.cumb is so big')
+    if (nrow(comb.pn)==0){
+        message('n.per or cut.cumb is so big')
+        return(NULL)
+    }
     colnames(comb.pn)=paste0('cut',1:cut.numb)
     res.n=cbind(comb.pn,n=tab,n.per=prop)
     # if linear regression return res.n, else go on
@@ -60,14 +66,17 @@ get_cutoff <- function(regress,data,x,cut.numb,n.per,include,round,y,y.per){
         prop.y=tab.y[,2]/rowSums(tab.y)
         if (all((prop.y >= y.per))){
             n.y=c(n.y,paste0(tab.y[,2],collapse = '/'))
-            prop.y=fastStat::digital(prop.y,round)
+            prop.y=digital(prop.y,round)
             prop=c(prop,paste0(prop.y,collapse = '/'))
         }else{
             res.n[i,]=NA
         }
     }
     res.p=data.frame(na.omit(res.n))
-    if (nrow(res.p)==0) stop('y.per or cut.cumb is so big')
+    if (nrow(res.p)==0){
+        message('y.per or cut.cumb is so big')
+        return(NULL)
+    }
     res.cut=cbind(res.p,y=n.y,y.per=prop)
     cat('   Combination: ',nrow(res.cut),'\n')
     return(res.cut)

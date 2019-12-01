@@ -2,7 +2,7 @@
 % Please edit documentation in R/linear.R
 \name{linear}
 \alias{linear}
-\title{Cutoff Value for Linear Regression}
+\title{Significant Cutoff Value for Linear Regression}
 \usage{
 linear(data, y, x, cut.numb, n.per, p.cut = 0.05, strict = TRUE,
   include = "low", round = 2)
@@ -21,23 +21,23 @@ linear(data, y, x, cut.numb, n.per, p.cut = 0.05, strict = TRUE,
 \item{p.cut}{cutoff of p value, default is 0.05}
 
 \item{strict}{logical. TRUE means significant differences for each group
-combination were considered. FALSE means considering for any group}
+combination were considered. FALSE means considering for any combination}
 
-\item{include}{direction of cutoff point. Any left letters of lower or upper}
+\item{include}{direction of cutoff point. Any left letter of lower or upper}
 
 \item{round}{digital. Default is 2}
 }
 \value{
 a dataframe contains cutoff points value, subject numbers in each group,
-    dump variable, beta of regression and p value.
+    dumb variable, beta of regression and p value.
 }
 \description{
-Cutoff Value for Linear Regression
+Significant Cutoff Value for Linear Regression
 }
 \examples{
 linear(data=mtcars,y='qsec',x='disp',
-cut.numb=2,
-n.per=0.25)
+       cut.numb=2,
+       n.per=0.25)
 
 linear(data=mtcars,y='qsec',x='disp',
        cut.numb=2,

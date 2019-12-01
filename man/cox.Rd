@@ -2,7 +2,7 @@
 % Please edit documentation in R/cox.R
 \name{cox}
 \alias{cox}
-\title{Cutoff Value for Cox Regression}
+\title{Significant Cutoff Value for Cox Regression}
 \usage{
 cox(data, time, y, x, cut.numb, n.per, y.per, p.cut = 0.05,
   strict = TRUE, include = "low", round = 2)
@@ -12,7 +12,7 @@ cox(data, time, y, x, cut.numb, n.per, y.per, p.cut = 0.05,
 
 \item{time}{name for time variable}
 
-\item{y}{name for y, must code as 1 and 0. The outcome must be 1}
+\item{y}{name for y, must be coded as 1 and 0. The outcome must be 1}
 
 \item{x}{name for x}
 
@@ -20,23 +20,23 @@ cox(data, time, y, x, cut.numb, n.per, y.per, p.cut = 0.05,
 
 \item{n.per}{the least percentage of the smaller group comprised in all patients}
 
-\item{y.per}{the least percentage of the outcome patients comprised in smaller group}
+\item{y.per}{the least percentage of the smaller outcome patients comprised in each group}
 
 \item{p.cut}{cutoff of p value, default is 0.05}
 
 \item{strict}{logical. TRUE means significant differences for each group
-combination were considered. FALSE means considering for any group}
+combination were considered. FALSE means considering for any combination}
 
-\item{include}{direction of cutoff point. Any left letters of lower or upper}
+\item{include}{direction of cutoff point. Any left letter of lower or upper}
 
 \item{round}{digital. Default is 2}
 }
 \value{
 a dataframe contains cutoff points value, subject numbers in each group,
-    dump variable, beta of regression and p value.
+    dumb variable, beta of regression and p value.
 }
 \description{
-Cutoff Value for Cox Regression
+Significant Cutoff Value for Cox Regression
 }
 \examples{
 cox(data=mtcars,
